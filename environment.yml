@@ -1,0 +1,18 @@
+name: PBCNet
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.7
+  - biopython
+  - rdkit=2018.09.3
+  - openbabel
+  - tqdm
+  - pytorch==1.10.2
+  - torchvision==0.11.3
+  - torchaudio==0.10.2
+  - requests
+  - scikit-learn
+  - openpyxl
+  - intel-openmp 

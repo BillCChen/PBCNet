@@ -394,7 +394,9 @@ if __name__ == "__main__":
                                                       num_workers=args.num_workers, pin_memory=True)
 
                 prediction_dataset = LeadOptDataset(
-                    f"{code_path}/data/finetune_input_files/{ref}_reference/{args.which_fep}_temp_predict.csv")
+                    # f"{code_path}/data/finetune_input_files/{ref}_reference/{args.which_fep}_temp_predict.csv"
+                    "/home/chenqixuan/drug_rerank/src/benchmark/model/PBCNet/PBCNet/data/10_reference/fep2_predict_.csv"
+                    )
                 prediction_dataloader = GraphDataLoader(prediction_dataset, collate_fn=collate_fn,
                                                         batch_size=args.batch_size,
                                                         drop_last=False, shuffle=False,

@@ -6,11 +6,10 @@ import pandas as pd
 import torch
 
 from utilis.utilis import Extend, pkl_load
-
 code_path = os.path.dirname(os.path.abspath(__file__))
 code_path = code_path.split('code')[0] + "data"
 
-
+import pickle
 def collate_fn(samples):
 
     ligand1_dir = [code_path + s.Ligand1.values[0].split("data")[-1] for s in samples]
@@ -41,7 +40,33 @@ def collate_fn(samples):
            torch.tensor(label2_list), \
            torch.tensor(rank1_list), \
            file_name
+def collate_fn_pkl(samples):
+    # samples: pro_lig[i], pro_lig[j],g_pockets[num],labels[i]-labels[j],labels[i],labels[j],i,j
+    graph1_list = [s[0] for s in samples]
+    graph2_list = [s[1] for s in samples]
+    pocket_list = [s[2] for s in samples]
+    file_name = ['fake_data' for _ in samples]
 
+    g1 = dgl.batch(graph1_list)
+    g2 = dgl.batch(graph2_list)
+    pock = dgl.batch(pocket_list)
+    # index_kj1, index_ji1 = triplets(g1)
+    # index_kj2, index_ji2 = triplets(g2)
+
+    label_list = [s[3] for s in samples]  # delta value (True label)
+    label1_list = [s[4] for s in samples]  # validation samples' labels
+    label2_list = [s[5] for s in samples]  # referance train samples' labels
+
+    rank_list_length = [s[-1] for s in samples]  
+
+    return g1, \
+           g2, \
+           pock, \
+           torch.tensor(label_list), \
+           torch.tensor(label1_list), \
+           torch.tensor(label2_list), \
+           torch.tensor(rank_list_length), \
+           file_name
 
 class LeadOptDataset():
     def __init__(self, df_path, label_scalar=None):
@@ -76,7 +101,24 @@ class LeadOptDataset():
 
     def __len__(self):
         return len(self.df)
+class LeadOptDataset_pkl():
+    def __init__(self, data_path='/data_lmdb'):
+        self.data = pickle.load(open(data_path+'/output_graph.pkl', 'rb'))
+        # self.df = self.df[0:256]
+        super(LeadOptDataset_pkl, self).__init__()
 
+            
+    # def file_names_(self):
+    #     ligand_dir = self.df.Ligand1.values
+    #     file_names = [s.rsplit("/", 2)[1] for s in ligand_dir]
+    #     return list(set(file_names))
+
+        
+    def __getitem__(self, idx):
+        return self.data[idx]
+
+    def __len__(self):
+        return len(self.data)
 # for finetune
 class LeadOptDataset_retrain():
     def __init__(self, df_path, corr_path, avoid_forget=0):
